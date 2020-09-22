@@ -1,0 +1,9 @@
+^/DEBIAN/control$
+^/DEBIAN/md5sums$
+^/usr/share/applications/skypeforlinux-share\.desktop$
+^/usr/share/applications/skypeforlinux\.desktop$
+^/usr/share/doc/skypeforlinux/third-party_attributions\.html$
+^/usr/share/icons/hicolor/[^/]+/apps/skypeforlinux\.png$
+^/usr/share/kservices5/ServiceMenus/skypeforlinux\.desktop$
+^/usr/share/pixmaps/skypeforlinux\.png$
+^/usr/share/skypeforlinux/

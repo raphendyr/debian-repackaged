@@ -1,0 +1,11 @@
+--- postinst.orig	2020-09-22 05:51:03.427374195 +0300
++++ postinst	2020-09-22 05:51:09.115458204 +0300
+@@ -7,8 +7,6 @@
+ case "$1" in
+     configure)
+         gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1
+-        # run the script immediately to configure repo
+-        nohup sh /opt/skypeforlinux/skypeforlinux > /dev/null 2>&1 &
+     ;;
+ 
+     abort-upgrade|abort-remove|abort-deconfigure)
