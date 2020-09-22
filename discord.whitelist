@@ -1,0 +1,8 @@
+^/DEBIAN/control$
+^/DEBIAN/md5sums$
+^/usr/bin/discord-canary$
+^/usr/share/applications/discord-canary.desktop$
+^/usr/share/discord-canary/
+^/usr/share/doc/discord-canary/copyright$
+^/usr/share/lintian/overrides/discord-canary$
+^/usr/share/pixmaps/discord-canary.png$

@@ -1,0 +1,35 @@
+/* basic theming */
+.theme-light main {
+    --header-primary: #595c61;
+    --text-normal: #000000;
+    --text-muted: #34617d;
+}
+.theme-dark main {
+    --header-primary: #efefef;
+    --text-normal: #ffffff;
+    --text-muted: #cad7df;
+}
+
+/* Chat Area */
+main div[class*=message-]:hover span[class*=timestamp-] {
+    opacity: 1; /* discord only shows these when window is in focus */
+    color: var(--text-normal);
+}
+main div[class*=message-] span[class*=username-] {
+    font-weight: bold;
+    color: var(--header-primary);
+}
+
+/* Input editor (in input box and when editing old message) */
+main div[class*=scrollableContainer-] {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--channels-default);
+    box-shadow: 1px 1px 0 var(--channels-default);
+}
+
+/* Bottom input box */
+main > form[class*=form-] {
+    margin-top: 0;
+    padding-top: 8px;
+    box-shadow: 0 -1px 0 var(--channels-default);
+}
