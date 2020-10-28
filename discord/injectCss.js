@@ -173,20 +173,20 @@ function findAndInject() {
   console.log(` -- injectCss.findAndInject(), attempt ${findAndInjectAttempt}`);
 
   // Find the main window by iterating over them
-  let webContents = null;
-  let wins = electron.BrowserWindow.getAllWindows();
-  for (var i = 0; i < wins.length; i++) {
-    let win = wins[i];
-    console.log("  - win: " + win + ", url: " + (typeof win.webContents != 'undefined' ? win.webContents.getURL() : 'none'));
-    if (typeof win.webContents != 'undefined' && win.webContents.getURL().indexOf("canary.discordapp.com/channels") > 0) {
-      webContents = win.webContents;
-      break;
-    }
-  };
+  const domains = [
+    "canary.discordapp.com/channels",
+    "canary.discord.com/channels",
+  ];
+  const all_windows = electron.BrowserWindow.getAllWindows();
+  const chat_window = all_windows.find(win => {
+    const url = typeof win.webContents != 'undefined' ? win.webContents.getURL() : undefined;
+    console.log("  - win: " + win + ", url: " + url);
+    return url !== undefined && domains.some(domain => url.includes(domain));
+  });
 
-  if (webContents != null) {
+  if (chat_window !== undefined && chat_window.webContents !== null) {
     // found, injection passed to next step
-    inject(webContents);
+    inject(chat_window.webContents);
   } else {
     // didn't find, try again
     findAndInjectAttempt++;
