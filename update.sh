@@ -164,7 +164,7 @@ cachefile="${config_file%.conf}-latest.deb"
 debug "Cached file          : $cachefile"
 
 # Download source to the cache file
-[[ -e $cachefile ]] || download "$cachefile" "$url"
+download "$cachefile" "$url"
 
 # Preparing cache dir
 clean_cache() {
