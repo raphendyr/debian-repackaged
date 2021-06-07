@@ -3,14 +3,33 @@ set -eu
 
 export TMPDIR=/dev/shm
 
-config_file="${1:-source.conf}"
-name=${config_file%.conf}
+config_file=
+keep=
+name=
+rebuild=
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--) shift ; break ;;
+		-k|--keep) keep=yes ;;
+		-n|--name) name=$2 ; shift ;;
+		-R|--rebuild) rebuild=yes ;;
+		-*) echo "Unknown option $1" >&2 ; exit 64 ;;
+		*) [[ -z $config_file ]] && config_file="$1" || break ;;
+	esac
+	shift
+done
+
+if [[ -z $config_file ]]; then
+	echo "usage: $0 [opts] <config>" >&2
+	exit 64
+fi
+
+if [[ -z $name ]]; then name=${config_file%.conf}; fi
 whitelist_file="$name.whitelist"
 sums_file="$name.sha256sums"
 last_updated_file="$name.last_updated"
 prepare_sh="$name.prepare.sh"
 modify_sh="$name.modify.sh"
-
 
 exit_msg() {
 	echo "$1" >&2
@@ -147,7 +166,7 @@ debug "Latest version       : $version"
 debug "Last updated version : ${last_updated:--}"
 
 # Check if update is required
-if [[ $last_updated ]] && dpkg --compare-versions "$version" le "$last_updated"; then
+if [[ -z $rebuild ]] && [[ $last_updated ]] && dpkg --compare-versions "$version" le "$last_updated"; then
 	echo "Package is uptodate ($version), no changes required.."
 	exit 0
 fi
@@ -168,8 +187,20 @@ download "$cachefile" "$url"
 
 # Preparing cache dir
 clean_cache() {
-	[[ "$cachedir" && -d "$cachedir" ]] && rm -rf "$cachedir"
-	[[ "$cachesums" && -f "$cachesums" ]] && rm -f "$cachesums"
+	if [[ "$cachedir" && -d "$cachedir" ]]; then
+		if [[ "$keep" ]]; then
+			echo "WARNING: cache dir $cachedir was not deleted!" >&2
+		else
+			rm -rf "$cachedir"
+		fi
+	fi
+	if [[ "$cachesums" && -f "$cachesums" ]]; then
+		if [[ "$keep" ]]; then
+			echo "WARNING: cached file $cachesums was not deleted!" >&2
+		else
+			rm -f "$cachesums"
+		fi
+	fi
 }
 trap clean_cache EXIT INT TERM
 cachedir=$(mktemp --tmpdir --directory repackage-${cachefile%.deb}.XXXXX)
