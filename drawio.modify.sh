@@ -2,7 +2,7 @@
 set -e
 
 root=$1
-resources="$root/opt/draw.io/resources"
+resources="$root/opt/drawio/resources"
 sources="$PWD/drawio"
 
 [[ $root && -d $root ]] || { echo "Missing '$root'" >&2; exit 1; }

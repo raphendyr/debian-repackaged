@@ -1,6 +1,6 @@
 ^/DEBIAN/control$
 ^/DEBIAN/md5sums$
-^/opt/draw\.io/
+^/opt/drawio/
 ^/usr/share/applications/drawio\.desktop$
 ^/usr/share/doc/draw\.io/changelog\.gz$
 ^/usr/share/icons/hicolor/[^/]+/apps/drawio\.png$
