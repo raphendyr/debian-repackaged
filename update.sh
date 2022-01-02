@@ -124,7 +124,7 @@ for b in \
 	curl grep sed zcat \
 	debsign dpkg dpkg-genchanges dupload fakeroot \
 ; do
-	if ! which $b >/dev/null; then
+	if ! command -v $b >/dev/null; then
 		echo "Missing required binary '$b'"
 		exit 1
 	fi
