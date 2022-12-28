@@ -14,7 +14,7 @@ while [[ $# -gt 0 ]]; do
 		-n|--name) name=$2 ; shift ;;
 		-R|--rebuild) rebuild=yes ;;
 		-*) echo "Unknown option $1" >&2 ; exit 64 ;;
-		*) [[ -z $config_file ]] && config_file="$1" || break ;;
+		*) { [[ -z $config_file ]] && config_file="$1"; } || break ;;
 	esac
 	shift
 done
@@ -33,7 +33,7 @@ modify_sh="$name.modify.sh"
 
 exit_msg() {
 	echo "$1" >&2
-	exit ${2:-1}
+	exit "${2:-1}"
 }
 
 debug() {
@@ -48,7 +48,7 @@ read_config() {
 		[[ $line ]] || continue
 		case "$line" in
 			LATEST_URL=*|VERSION_*|DOWNLOAD_URL=*|DEB_*)
-				declare -gr -- "$line" || exit_msg "Invalid config"
+				declare -gr -- "$line" || exit_msg "Invalid config"
 				;;
 			*)
 				exit_msg "Invalid option ${line%%=*}"
@@ -59,7 +59,7 @@ read_config() {
 
 resolve_redirects() {
 	debug "curl $1"
-	curl -LsSf -I -w %{url_effective} -o /dev/null "$1"
+	curl -LsSf -I -w '%{url_effective}' -o /dev/null "$1"
 }
 
 resolve_modified_header() {
@@ -74,7 +74,7 @@ resolve_modified_header() {
 
 resolve_version() {
 	if [[ $2 =~ $1 ]]; then
-		if [[ ${#BASH_REMATCH[@]} > 1 ]]; then
+		if [[ ${#BASH_REMATCH[@]} -gt 1 ]]; then
 			echo "${BASH_REMATCH[1]}"
 		else
 			echo "${BASH_REMATCH[0]}"
@@ -96,7 +96,7 @@ find_dangerous_files() {
 		debug "Missing '$whitelist_file'"
 	fi
 	while IFS= read -r -d $'\0' filename; do
-		filename="/${filename#$prefix}"
+		filename="/${filename#"$prefix"}"
 		matched=
 		for pattern in "${whitelist[@]}"; do
 			if [[ $filename =~ $pattern ]]; then
@@ -174,7 +174,7 @@ fi
 # Resolve download url
 if [[ $DOWNLOAD_URL ]]; then
 	url=${DOWNLOAD_URL//\$VERSION/$version}
-	[[ $url == $DOWNLOAD_URL ]] && exit_msg "Invalid DOWNLOAD_URL: \$VERSION was not found or replaced"
+	[[ $url == "$DOWNLOAD_URL" ]] && exit_msg "Invalid DOWNLOAD_URL: \$VERSION was not found or replaced"
 fi
 debug "Download url         : $url"
 
@@ -203,10 +203,11 @@ clean_cache() {
 	fi
 }
 trap clean_cache EXIT INT TERM
-cachedir=$(mktemp --tmpdir --directory repackage-${cachefile%.deb}.XXXXX)
+cachedir=$(mktemp --tmpdir --directory "repackage-${cachefile%.deb}.XXXXX")
 cachesums="${cachedir%/}.sha256sums"
 
 # Extract package
+# shellcheck disable=SC2016
 fakeroot sh -ec \
 	'dpkg -x "$1" "$2" && dpkg -e "$1" "$2/DEBIAN"' - \
 	"$cachefile" "$cachedir"
@@ -220,7 +221,7 @@ fakeroot sh -ec \
 	if [[ -e "DEBIAN/sha256sums" ]]; then
 		sha256sum -c "DEBIAN/sha256sums" || exit_msg "Invalid sha256sum in the source package"
 	fi
-) | { grep -v ': OK$' || true; }
+) | if grep -v ': OK$'; then exit 1; fi
 
 # Execute prepare script
 [[ -x $prepare_sh ]] && fakeroot "./$prepare_sh" "$cachedir"
@@ -242,7 +243,7 @@ fi
 # Prepare Debian files
 DEBFULLNAME=${DEBFULLNAME:-${NAME:-}}
 DEBEMAIL=${DEBEMAIL:-${EMAIL:-}}
-if [[ $DEBEMAIL =~ "^(.*)\s+<(.*)>$" ]]; then
+if [[ $DEBEMAIL =~ ^(.*)\s+"<"(.*)">"$ ]]; then
 	DEBFULLNAME=${DEBFULLNAME:-${BASH_REMATCH[1]}}
 	DEBEMAIL=${BASH_REMATCH[2]}
 fi
@@ -289,7 +290,7 @@ if [[ -e "$cached_changelog" ]]; then
 fi
 
 mkdir -p "$cachedir/usr/share/doc/$deb_name"
-cat "$cachedir/DEBIAN/changelog" | gzip -c | fakeroot tee "$cachedir/usr/share/doc/$deb_name/changelog.gz" >/dev/null
+gzip -c < "$cachedir/DEBIAN/changelog" | fakeroot tee "$cachedir/usr/share/doc/$deb_name/changelog.gz" >/dev/null
 rm "$cachedir/DEBIAN/changelog" # changelog is not supposed to be part of the control package
 
 # Recalculate md5sums before rebuild
