@@ -18,17 +18,8 @@ app="$root/app"
 [[ -e "$resources/app.asar" ]] || { echo "Missing '$resources/app.asar'" >&2; exit 1; }
 "$asar" extract "$resources/app.asar" "$app"
 
-# Copy files
-cp "$sources/disableUpdate.js" "$app/"
-
-# Patch indexjs
-sed -i \
-	-e 's,^\(\s*const menuBar = menu\.buildFromTemplate(template)\)$,/* XXX: remove menu */\n//\1,' \
-	-e 's,^\(\s*menu\.setApplicationMenu(menuBar)\)$,//\1,' \
-	-e '/^    let win = createWindow()/a\    /* XXX: remove menu */\n    win.removeMenu()' \
-	"$app/electron.js"
-grep -qsE '^\s*//.*setApplicationMenu' "$app/electron.js" || { echo "Fixing menu failed! (1)" >&2; exit 1; }
-grep -qsE '^\s*win\.removeMenu' "$app/electron.js" || { echo "Fixing menu failed! (2)" >&2; exit 1; }
+# path 1) Disable update system of the app
+cp "$sources/disableUpdate.js" "$app/drawio/src/main/webapp/disableUpdate.js"
 
 # Repackage
 rm -f "$resources/app.asar"
